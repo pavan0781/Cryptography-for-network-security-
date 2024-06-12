@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+void encrypt(char *plaintext, int shift, char *ciphertext) {
+    int i;
+    char c;
+    for (i = 0; plaintext[i] != '\0'; i++) {
+        c = plaintext[i];
+        if (isalpha(c)) {
+            if (islower(c)) {
+                ciphertext[i] = ((c - 'a' + shift) % 26) + 'a';
+            } else {
+                ciphertext[i] = ((c - 'A' + shift) % 26) + 'A';
+            }
+        } else {
+            ciphertext[i] = c; // Non-alphabetic characters remain the same
+        }
+    }
+    ciphertext[i] = '\0';
+}
+
+void decrypt(char *ciphertext, int shift, char *plaintext) {
+    int i;
+    char c;
+    for (i = 0; ciphertext[i] != '\0'; i++) {
+        c = ciphertext[i];
+        if (isalpha(c)) {
+            if (islower(c)) {
+                plaintext[i] = ((c - 'a' - shift + 26) % 26) + 'a';
+            } else {
+                plaintext[i] = ((c - 'A' - shift + 26) % 26) + 'A';
+            }
+        } else {
+            plaintext[i] = c; // Non-alphabetic characters remain the same
+        }
+    }
+    plaintext[i] = '\0';
+}
+
+int main() {
+    char plaintext[100], ciphertext[100];
+    int shift;
+    
+    printf("Enter the plaintext: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+    plaintext[strcspn(plaintext, "\n")] = '\0'; // Remove the newline character from the input
+    
+    printf("Enter the shift value: ");
+    scanf("%d", &shift);
+    
+    encrypt(plaintext, shift, ciphertext);
+    printf("Encrypted text: %s\n", ciphertext);
+    
+    decrypt(ciphertext, shift, plaintext);
+    printf("Decrypted text: %s\n", plaintext);
+    
+    return 0;
+}
