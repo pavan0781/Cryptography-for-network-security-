@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define SIZE 5 // Size of the key square
+
+// Function to prepare the key square
+void prepareKeySquare(char *key, char keySquare[SIZE][SIZE]) {
+    int i, j, k, flag = 0, *visited = (int *)calloc(26, sizeof(int));
+
+    // Fill the key square with the key
+    for (i = 0; i < strlen(key); i++) {
+        if (key[i] != 'j') {
+            if (!visited[key[i] - 'a']) {
+                keySquare[flag / SIZE][flag % SIZE] = key[i];
+                visited[key[i] - 'a'] = 1;
+                flag++;
+            }
+        }
+    }
+
+    // Fill the remaining cells with the remaining letters of the alphabet
+    for (i = 0; i < 26; i++) {
+        if (i != ('j' - 'a')) {
+            if (!visited[i]) {
+                keySquare[flag / SIZE][flag % SIZE] = i + 'a';
+                visited[i] = 1;
+                flag++;
+            }
+        }
+    }
+
+    // Print the key square
+    printf("Key Square:\n");
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            printf("%c ", keySquare[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Function to find the positions of characters in the key square
+void findPosition(char keySquare[SIZE][SIZE], char ch, int *row, int *col) {
+    int i, j;
+    if (ch == 'j')
+        ch = 'i';
+
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            if (keySquare[i][j] == ch) {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
+
+// Function to encrypt the plaintext
+void encrypt(char *plaintext, char keySquare[SIZE][SIZE]) {
+    int i, len = strlen(plaintext), a, b, r1, r2, c1, c2;
+    char *ciphertext = (char *)malloc(len * sizeof(char));
+
+    for (i = 0; i < len; i += 2) {
+        a = plaintext[i];
+        b = (i + 1 < len) ? plaintext[i + 1] : 'x';
+
+        if (a == 'j') a = 'i';
+        if (b == 'j') b = 'i';
+
+        findPosition(keySquare, a, &r1, &c1);
+        findPosition(keySquare, b, &r2, &c2);
+
+        if (r1 == r2) {
+            ciphertext[i] = keySquare[r1][(c1 + 1) % SIZE];
+            ciphertext[i + 1] = keySquare[r1][(c2 + 1) % SIZE];
+        } else if (c1 == c2) {
+            ciphertext[i] = keySquare[(r1 + 1) % SIZE][c1];
+            ciphertext[i + 1] = keySquare[(r2 + 1) % SIZE][c1];
+        } else {
+            ciphertext[i] = keySquare[r1][c2];
+            ciphertext[i + 1] = keySquare[r2][c1];
+        }
+    }
+
+    printf("Encrypted Text: %s\n", ciphertext);
+    free(ciphertext);
+}
+
+int main() {
+    char key[50], plaintext[100], keySquare[SIZE][SIZE];
+    
+    printf("Enter the key: ");
+    scanf("%s", key);
+
+    printf("Enter the plaintext: ");
+    scanf("%s", plaintext);
+
+    prepareKeySquare(key, keySquare);
+    encrypt(plaintext, keySquare);
+
+    return 0;
+}
